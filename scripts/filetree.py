@@ -134,4 +134,23 @@ if __name__ == '__main__':
     args = sys.argv[1:]
     for i, a in enumerate(args):
         if a == '--project' and i+1 < len(args): root = args[i+1]
+    root = os.path.abspath(root)
+
+    # Capture output
+    import io
+    old_stdout = sys.stdout
+    sys.stdout = buf = io.StringIO()
     filetree(root)
+    sys.stdout = old_stdout
+    output = buf.getvalue()
+
+    # Print to terminal
+    print(output)
+
+    # Save to code-diagram/filetree.md
+    out_dir = os.path.join(root, "code-diagram")
+    os.makedirs(out_dir, exist_ok=True)
+    out = os.path.join(out_dir, "filetree.md")
+    with open(out, 'w') as f:
+        f.write(f"# File Structure — {os.path.basename(root)}\n\n```\n{output}```\n")
+    print(f"✓ Saved: {out}")
