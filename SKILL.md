@@ -484,27 +484,7 @@ bash <skill-dir>/scripts/export-diagram.sh file.puml -w 1920
 }
 ```
 
-### Feature Detail 示例 (CLCI)
-
-| Module | 功能 | 入口函数 | 通信 | 文件 |
-|--------|------|---------|------|------|
-| mainband | Link training | `mbd_main_state_change()` | mainband | mainband.c |
-| sideband | 协议栈 init | `sideband_init()` | sideband, irq | sideband.c |
-| command | CMD_CLCI_LINK | `cmd_clci_link()` | mailbox, mmio | clci_command.c |
-
-### Feature Switches 示例 (CLCI)
-
-| 宏 | 默认值 | Module | 作用 |
-|----|--------|--------|------|
-| `SIDEBAND_UCIE_INIT_MODE_SET_SUPPORT` | 1 | sideband | SB init HW 复位 |
-| `AUTO_LINK_MODE` | 0 | link | 自动 Link 模式 |
-| `DOORBELL_MODE_ISR` | 0 | driver | Doorbell 中断/轮询 |
-
-### Review 发现示例 (CLCI)
-
-- 🔴 R2: `sideband_drv_msg_cmd()` — 10 callers, GOD NODE #4
-- 🔴 R4: `clci_config_t` @ 0x17c00 — HW 地址映射, 字段顺序不可变
-- 🟡 R5: `cmd_aphy_init` — 错误路径无 `sys_error_save`
+> 完整示例见 `examples/` 目录（含 CLCI embedded-firmware、REST service、CLI tool 等项目类型的实际数据）。
 
 ---
 
