@@ -1,0 +1,65 @@
+' ─────────────────────────────────────────────────────
+' CLCI Firmware Diagram Style — Compact
+' 用于代码注释内嵌、窄栏文档、终端截图
+' 字体缩小, 间距收紧, 适合节点 >30 的大图
+' ─────────────────────────────────────────────────────
+
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontName "Helvetica Neue",Helvetica,Arial,"PingFang SC","Microsoft YaHei","SimHei",sans-serif
+skinparam defaultFontSize 11
+skinparam defaultTextAlignment center
+skinparam dpi 150
+
+' ── 箭头 ──
+skinparam ArrowColor #2C2C2C
+skinparam ArrowThickness 1.4
+skinparam ArrowFontName "Helvetica Neue",Helvetica,Arial,"PingFang SC","Microsoft YaHei","SimHei",sans-serif
+skinparam ArrowFontSize 10
+skinparam ArrowFontColor #2C2C2C
+
+' ── 活动/步骤 ──
+skinparam ActivityBackgroundColor #F5F6F8
+skinparam ActivityBorderColor #4060A0
+skinparam ActivityBorderThickness 1.0
+skinparam ActivityFontName "Helvetica Neue",Helvetica,Arial,"PingFang SC","Microsoft YaHei","SimHei",sans-serif
+skinparam ActivityFontSize 10
+skinparam ActivityFontColor #1A1A2E
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+skinparam ActivityDiamondBorderColor #B09050
+
+' ── 分区 ──
+skinparam PartitionBackgroundColor #EDF0F5
+skinparam PartitionBorderColor #4060A0
+skinparam PartitionBorderThickness 1.2
+skinparam PartitionFontName "Helvetica Neue",Helvetica,Arial,"PingFang SC","Microsoft YaHei","SimHei",sans-serif
+skinparam PartitionFontSize 11
+skinparam PartitionFontColor #16213E
+
+' ── 注释 ──
+skinparam NoteBackgroundColor #F8F8F8
+skinparam NoteBorderColor #B0B0B0
+skinparam NoteBorderThickness 1.0
+skinparam NoteFontName "Helvetica Neue",Helvetica,Arial,"PingFang SC","Microsoft YaHei","SimHei",sans-serif
+skinparam NoteFontSize 9
+skinparam NoteFontColor #3A3A3A
+skinparam NoteTextAlignment left
+
+' ── 标题 ──
+skinparam TitleFontName "Helvetica Neue",Helvetica,Arial,"PingFang SC","Microsoft YaHei","SimHei",sans-serif
+skinparam TitleFontSize 14
+skinparam TitleFontColor #0D1B2A
+
+' ── 条件 ──
+skinparam ConditionStyle diamond
+skinparam ConditionEndStyle hline
+skinparam ConditionBackgroundColor #F5F6F8
+skinparam ConditionBorderColor #4060A0
+
+' ── 循环 ──
+skinparam RepeatBorderColor #4060A0
+skinparam RepeatBackgroundColor #F5F6F8
+
+' ── 包 ──
+skinparam PackageBackgroundColor #EDF0F5
+skinparam PackageBorderColor #4060A0
+skinparam PackageFontSize 10

@@ -1,0 +1,118 @@
+' ─────────────────────────────────────────────────────
+' CLCI 语义宏 — 箭头 + 形状词汇
+' 适用: 时序图 (sequence), 组件图 (component/architecture)
+' 不适用: 活动图 (activity) — 活动图用 note 标注通信模式
+'
+' 使用: !include styles/clci-semantic.puml
+'       或将其内容直接内联到 @startuml 后
+' ─────────────────────────────────────────────────────
+
+' ═══════════════════════════════════════════
+' Ⅰ. 语义箭头 (7 种 Flow)
+' ═══════════════════════════════════════════
+
+' ── 寄存器读写 (MMIO) ── 蓝色实线
+!define ARROW_MMIO -[#2563eb]->
+
+' ── Mailbox 命令/响应 ── 紫色实线
+!define ARROW_MBOX -[#7c3aed]->
+
+' ── Sideband 跨 Die 消息 ── 绿色虚线
+!define ARROW_SDB -[#059669]-->
+
+' ── Mainband 高速数据 ── 橙色实线
+!define ARROW_MAINBAND -[#ea580c]->
+
+' ── 中断 / Doorbell ── 红色虚线
+!define ARROW_IRQ -[#dc2626]-->
+
+' ── DMA 传输 ── 青色虚线
+!define ARROW_DMA -[#0891b2]-->
+
+' ── 状态迁移 ── 灰色实线
+!define ARROW_STATE -[#6b7280]->
+
+' ═══════════════════════════════════════════
+' Ⅱ. 形状词汇
+' ═══════════════════════════════════════════
+
+' ── 寄存器块 (CSR 寄存器，显示名称和地址) ──
+' 用法: REG(id, label, addr)
+!define REG(id, label, addr) rectangle "**REG**\nlabel\naddr" as id
+
+' ── 中断服务例程 ──
+' 用法: ISR_HANDLER(id, label)
+!define ISR_HANDLER(id, label) hexagon "**ISR**\nlabel" as id
+
+' ── DMA 引擎 ──
+' 用法: DMA_ENGINE(id, label)
+!define DMA_ENGINE(id, label) folder "**DMA**\nlabel" as id
+
+' ── Mailbox 消息队列 ──
+' 用法: MAILBOX(id, label)
+!define MAILBOX(id, label) database "**Mailbox**\nlabel" as id
+
+' ── PHY 层 (物理层，带背景色) ──
+' 用法: PHY_NODE(id, label)
+!define PHY_NODE(id, label) node "**PHY**\nlabel" as id #LightCoral
+
+' ── 命令入口 (SDK 命令) ──
+' 用法: CMD_ENTRY(id, label)
+!define CMD_ENTRY(id, label) rectangle "**CMD**\nlabel" as id #LightBlue
+
+' ── Die 边界 (物理 Die) ──
+' 用法: DIE_NODE(id, label, color)
+!define DIE_NODE(id, label, color) collections "**Die**\nlabel" as id
+
+' ═══════════════════════════════════════════
+' Ⅲ. 图例模板 (当使用 2+ 种箭头时必加)
+' ═══════════════════════════════════════════
+' 在 diagram 末尾添加:
+'
+' legend bottom right
+'   <#2563eb>  |= MMIO 寄存器读写 |
+'   <#7c3aed>  |= Mailbox 命令响应 |
+'   <#059669>  |.. Sideband 跨 Die 消息 |
+'   <#ea580c>  |= Mainband 高速数据 |
+'   <#dc2626>  |.. 中断 / Doorbell |
+'   <#0891b2>  |.. DMA 传输 |
+'   <#6b7280>  |= 状态迁移 |
+' endlegend
+'
+' 注意: PlantUML legend 中：
+'   |= 表示实线 filled arrow
+'   |.. 表示虚线
+
+' ═══════════════════════════════════════════
+' Ⅳ. 活动图通信模式标注 (activity diagram 用)
+' ═══════════════════════════════════════════
+' 活动图中不直接使用以上箭头宏，而是在步骤 note 中标注通信模式:
+'
+'   :[[/api/source?... mmio_read_32()]];
+'   note right: [mmio] 读 CSR 寄存器
+'
+'   :cmd_parser();
+'   note right: [mailbox] 命令分发\nGOD NODE (33 edges)
+'
+'   :sideband_drv_msg_cmd();
+'   note right: [sideband] 跨 Die 消息
+'
+'   :doorbell_handler();
+'   note right: [irq] Doorbell 中断处理
+'
+' 活动图节点着色:
+'   :寄存器操作;#LightBlue>
+'   :中断处理;#FFE4E4>
+'   :DMA 传输;#E0F2F1>
+'   :状态迁移;#F5F5F5>
+'
+' ⚠ H11 KNOWN BUG (PlantUML 1.2026.2):
+'   :text;#Color> 后缀后紧跟 if 或 note right 会导致 "Cannot find if" 错误。
+'   受影响的 .puml 模式:
+'     :step;#LightBlue>     ← BUG: 后续 if 被吞噬
+'     note right: ...       ← BUG: note right 也被吞噬
+'     if (cond?) then
+'   规避方法:
+'     1) 在 note right 中用 [mmio]/[irq]/[dma] 标注通信模式，放弃节点着色
+'     2) 如必须着色，在该节点和 if 之间插入一个无样式中间节点
+'     3) 不要使用 :#Color>text; 前缀语法——渲染通过但颜色实际不生效

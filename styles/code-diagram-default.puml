@@ -1,0 +1,69 @@
+' ─────────────────────────────────────────────────────
+' CLCI Firmware Diagram Style — Default
+' 用于 doc/firware_workflow/ 下的标准流程图
+' 生成方式: !include 或手动拼接 skinparam 块
+' ─────────────────────────────────────────────────────
+
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontName "Helvetica Neue",Helvetica,Arial,"PingFang SC","Microsoft YaHei","SimHei",sans-serif
+skinparam defaultFontSize 14
+skinparam defaultTextAlignment center
+skinparam dpi 150
+
+' ── 箭头 ──
+skinparam ArrowColor #383838
+skinparam ArrowThickness 1.8
+skinparam ArrowFontName "Helvetica Neue",Helvetica,Arial,"PingFang SC","Microsoft YaHei","SimHei",sans-serif
+skinparam ArrowFontSize 12
+skinparam ArrowFontColor #383838
+
+' ── 活动/步骤 ──
+skinparam ActivityBackgroundColor #F8F9FA
+skinparam ActivityBorderColor #305080
+skinparam ActivityBorderThickness 1.2
+skinparam ActivityFontName "Helvetica Neue",Helvetica,Arial,"PingFang SC","Microsoft YaHei","SimHei",sans-serif
+skinparam ActivityFontSize 13
+skinparam ActivityFontColor #1A1A2E
+skinparam ActivityDiamondBackgroundColor #FFF8E1
+skinparam ActivityDiamondBorderColor #C0A060
+
+' ── 分区 ──
+skinparam PartitionBackgroundColor #F0F4F8
+skinparam PartitionBorderColor #305080
+skinparam PartitionBorderThickness 1.5
+skinparam PartitionFontName "Helvetica Neue",Helvetica,Arial,"PingFang SC","Microsoft YaHei","SimHei",sans-serif
+skinparam PartitionFontSize 14
+skinparam PartitionFontColor #16213E
+
+' ── 注释 ──
+skinparam NoteBackgroundColor #FBFBFB
+skinparam NoteBorderColor #C0C0C0
+skinparam NoteBorderThickness 1.0
+skinparam NoteFontName "Helvetica Neue",Helvetica,Arial,"PingFang SC","Microsoft YaHei","SimHei",sans-serif
+skinparam NoteFontSize 12
+skinparam NoteFontColor #4A4A4A
+skinparam NoteTextAlignment left
+
+' ── 标题 ──
+skinparam TitleFontName "Helvetica Neue",Helvetica,Arial,"PingFang SC","Microsoft YaHei","SimHei",sans-serif
+skinparam TitleFontSize 18
+skinparam TitleFontColor #0D1B2A
+
+' ── 条件 (if/else) ──
+skinparam ConditionStyle diamond
+skinparam ConditionEndStyle hline
+skinparam ConditionBackgroundColor #F8F9FA
+skinparam ConditionBorderColor #305080
+
+' ── 泳道 / 盒子 ──
+skinparam BoxPadding 8
+skinparam ParticipantPadding 40
+
+' ── 循环 ──
+skinparam RepeatBorderColor #305080
+skinparam RepeatBackgroundColor #F8F9FA
+
+' ── 包 (架构图用) ──
+skinparam PackageBackgroundColor #F0F4F8
+skinparam PackageBorderColor #305080
+skinparam PackageFontSize 13
