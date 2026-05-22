@@ -66,7 +66,7 @@
 
 ```bash
 # 1. 克隆到 Claude Code 的 skills 目录
-git clone https://github.com/your-org/code-diagram.git ~/.claude/skills/code-diagram
+git clone https://github.com/Brody888/code-diagram.git ~/.claude/skills/code-diagram
 
 # 2. 确认 skill 已加载
 ls ~/.claude/skills/code-diagram/
@@ -84,7 +84,7 @@ ls ~/.claude/skills/code-diagram/
 
 ```bash
 # 1. 克隆到任意位置
-git clone https://github.com/your-org/code-diagram.git ~/tools/code-diagram
+git clone https://github.com/Brody888/code-diagram.git ~/tools/code-diagram
 cd ~/tools/code-diagram
 
 # 2. 确认 Python 版本 (需要 3.9+)
