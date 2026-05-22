@@ -70,7 +70,7 @@ git clone https://github.com/Brody888/code-diagram.git ~/.claude/skills/code-dia
 
 # 2. 确认 skill 已加载
 ls ~/.claude/skills/code-diagram/
-# 应看到: README.md  SKILL.md  scripts/  styles/
+# 应看到: README.md  SKILL.md  scripts/  styles/  examples/
 
 # 3. 在 Claude Code 中进入你的项目目录，然后：
 /code-diagram --init
@@ -91,8 +91,11 @@ cd ~/tools/code-diagram
 python3 --version
 # Python 3.12.x ✓
 
-# 3. 复制 SKILL.md 的内容作为 system prompt 注入你的 agent
-#    或者直接手动调用 scripts/ 目录下的脚本：
+# 3. 将 SKILL.md 的内容作为 system prompt 注入你的 agent
+#    然后直接调用 scripts/ 目录下的脚本：
+
+# 项目检测
+python3 scripts/init-project.py /path/to/your/project
 
 # 索引构建
 python3 scripts/build-index.py --project /path/to/your/project
@@ -104,17 +107,17 @@ python3 scripts/features-report.py --project /path/to/your/project
 python3 scripts/features-report.py --project /path/to/your/project --html
 
 # 代码审查
-python3 scripts/review-report.py --project /path/to/your/project
+python3 scripts/generate-review-report.py --project /path/to/your/project
 ```
 
 ### 方法 3：手动下载
 
 ```bash
 # 下载最新版本
-curl -L https://github.com/your-org/code-diagram/releases/latest/download/code-diagram.tar.gz | tar xz
+curl -L https://github.com/Brody888/code-diagram/releases/latest/download/code-diagram.tar.gz | tar xz
 cd code-diagram
 
-# 验证脚本可执行
+# 验证
 python3 scripts/build-index.py --help
 ```
 
@@ -135,14 +138,28 @@ brew install plantuml librsvg python
 pip install cairosvg
 
 # 如果不需要 PNG 导出，可以跳过所有可选依赖：
-/code-diagram -t activity my_func --no-png   # 只生成 .puml 源文件
+/code-diagram -t activity process_job --no-png   # 只生成 .puml 源文件
 ```
 
 ---
 
 ## 完整使用示例
 
-以下示例基于真实的 CLCI 嵌入式固件项目 (`sep1_fw_v1.6.3`, C, bare-metal)。
+以下示例基于一个虚拟项目 **`task-scheduler`**（Go 语言 REST 服务 + CLI 工具）：
+
+```
+task-scheduler/
+├── cmd/scheduler/main.go     # CLI 入口
+├── internal/
+│   ├── api/                   # HTTP handler
+│   ├── scheduler/             # 调度引擎
+│   ├── queue/                 # 消息队列
+│   └── db/                    # 数据库层
+├── config/
+│   └── config.go              # 配置 + feature flags
+├── go.mod
+└── go.sum
+```
 
 ### Step 1: `--init` 项目检测
 
@@ -150,48 +167,34 @@ pip install cairosvg
 /code-diagram --init
 ```
 
-**实际输出**：
+**输出**：
 
 ```
-正在扫描项目...
-  语言:        C (C11), RISC-V 交叉编译
-  构建系统:    CMake + Makefile.cmake
-  源码目录:    drivers/ (12 files), product/sep1/ (2 files), common/
-  测试目录:    未检测到
-  框架:        Bare-metal embedded (无 RTOS)
+Scanning: /Users/me/projects/task-scheduler
 
-  模块划分:    6 个目录模块
-    C1  — mainband          Mainband 状态机
-    C3  — sideband/v3       Sideband 协议栈
-    C6  — drivers           通用读写 + link 引擎
-    C9  — clci_command.c    Mailbox 命令分发
-    C10 — product/sep1/src/ 产品适配
-    C16 — dwc_uart/wdt/doorbell/timer  底层驱动
+  Language: Go (.go = 85%)
+  Build: go.mod
+  Signal: http ✓
+  Signal: cli ✓
+  Signal: error_model ✓
+  Preset: rest-service (detected: rest-service)
 
-  开关宏:      23 个 #define 从 config.h 提取
-  中断注册:    5 个 ISR handler 从源码提取
-  错误上报:    检测到 sys_error_save() + DOORBELL_TO_SOC 模式
+  Source dirs: ['cmd', 'internal', 'config']
 
-  Preset: embedded-firmware
-
-已生成: .code-diagram.json
+✓ /Users/me/projects/task-scheduler/.code-diagram.json
 ```
 
-`.code-diagram.json` 内容：
+生成的 `.code-diagram.json`：
 
 ```json
 {
-  "project": "clci_combo",
-  "language": "C",
-  "build_system": "cmake",
-  "framework": "bare-metal",
-  "preset": "embedded-firmware",
-  "source_roots": ["drivers/", "product/sep1/src/", "common/"],
-  "modules": {
-    "mainband": {"role": "Mainband 状态机", "dir": "drivers/mainband/"},
-    "sideband": {"role": "Sideband 协议栈", "dir": "drivers/sideband/v3/"},
-    "command":  {"role": "Mailbox 命令分发", "dir": "drivers/clci_command.c"}
-  }
+  "project": "task-scheduler",
+  "language": "Go",
+  "build_system": "go",
+  "framework": "rest-service",
+  "preset": "rest-service",
+  "source_dirs": ["cmd/", "internal/", "config/"],
+  "signals": ["http", "cli", "error_model"]
 }
 ```
 
@@ -201,55 +204,43 @@ pip install cairosvg
 /code-diagram --index
 ```
 
-**实际输出**：
+**输出**：
 
 ```
-1. Types from .c signatures: 12 → regex: 16 types
-2. Functions discovered: 1,039
-3. CLI commands: 26 (add_command pattern)
-4. Public APIs: 82 (location scoring)
-5. Modules: 6
-6. Switches: 463
-7. Products: 8
+  Types: 22 base + 18 discovered = 40 total
+  Functions: 386
+  CLI commands: 12 (cobra.Command pattern)
+  Public APIs: 47 (location scoring)
+  Switches: 15 (go build tags + config flags)
+  Products: 0
 
-✓ Index: code-diagram/clci_user_sdk.json
-  1039 funcs | 26 CLI | 82 APIs | 463 switches | 8 products
+✓ task-scheduler/code-diagram/task-scheduler.json
+  386 funcs | 12 CLI | 47 APIs | 15 switches
 ```
 
 ### Step 3: `--tree` 调用链追踪
 
 ```bash
-/code-diagram --tree cmd_clci_link
+/code-diagram --tree schedule_task
 ```
 
-**实际输出**：
+**输出**：
 
 ```
-调用链树 (4层, 20+ 函数):
-  cmd_clci_link()  [C9: clci_command.c:368]
-  └── sep1_link_with_int()  [C10: sep1_ram.c:542]  ← fp: clci_api.clci_link
-      └── sep1_link()  [C10: sep1_ram.c:524]
-          ├── clci_bitlock()  [C6: clci_link.c:499]  ← fp: clci_api.clci_bitlock
-          │   ├── clci_bitlock_en()              [mmio] per die/lane
-          │   ├── clci_bitlock_state_check(0x1)  [mmio] 轮询
-          │   ├── clci_bitlock_state_trigger()   [mmio] ×3
-          │   ├── phase0_data_check()            [mmio] 轮询
-          │   ├── phase0_clock_check()           [mmio] 轮询
-          │   ├── delay_line_config()            [mmio] 校准
-          │   └── phase1_check()                 [mmio] 轮询 CTRL1/2
-          ├── clci_pcslock()  [C6: clci_link.c:770]  ← fp: clci_api.clci_pcslock
-          │   ├── pcslock_trigger()      [mmio] BER check
-          │   ├── rx_fh_check()          [mmio] 轮询
-          │   ├── lane_sync_check()      [mmio] 轮询
-          │   ├── lane_link_check()      [mmio] 轮询
-          │   └── tx_en()                [mmio] enable TX
-          └── sep1_enable_mac_tx_ready() [mmio]
+调用链树 (3层):
+  schedule_task()  [scheduler: scheduler.go:142]
+  ├── validateTask()        [scheduler: validator.go:28]
+  ├── db.InsertTask()       [rpc → database]
+  │   └── db.conn.ExecContext()  [sql driver]
+  ├── queue.Enqueue()       [event → message broker]
+  │   └── rabbitmq.Publish()  [amqp]
+  └── api.respondJSON()     [http → client]
+      └── json.Marshal()    [stdlib]
 
-分支:  bitlock phase 任一 fail → sys_error_save → return
-循环:  per-die, per-lane (bitlock state check / pcslock rx check)
-通信:  mailbox(1) + mmio(5+bitlock phases) + irq(2 doorbell)
-
-⏱  Index lookup: 37 functions available, no grep needed
+分支:  task invalid → return 400
+       db insert fail → return 500 + rollback
+循环:  无
+通信:  rpc(1) + event(1) + http(1)
 ```
 
 ### Step 4: `--features` 功能清单
@@ -258,48 +249,39 @@ pip install cairosvg
 /code-diagram --features
 ```
 
-**终端输出**（摘要，完整报告写入 `code-diagram/features-report.md`）：
+**输出**（完整报告写入 `code-diagram/features-report.md`）：
 
 ```
 ## 表 1 — Module Overview
 | Module     | 函数数 | 职责 |
 |------------|--------|------|
-| mainband   | 12     | Mainband 10-state hook machine |
-| sideband   | 45     | Sideband 协议栈 (4-layer)      |
-| command    | 32     | Mailbox 命令分发               |
-| link       | 18     | Bitlock/PCSLock 引擎           |
-| platform   | 8      | 启动 + 产品适配                |
-| driver     | 15     | UART/WDT/Doorbell/Timer        |
+| scheduler  | 34     | 调度引擎核心 |
+| api        | 28     | REST API handler |
+| queue      | 18     | 消息队列适配 |
+| db         | 22     | 数据库层 |
+| cmd        | 15     | CLI 入口 + 配置 |
 
 ## 表 2 — Feature Detail
-| Module   | 功能            | 入口函数              | 通信          |
-|----------|----------------|----------------------|---------------|
-| command  | CMD_CLCI_LINK  | cmd_clci_link()      | mailbox, mmio |
-| command  | CMD_BITLOCK    | cmd_bitlock()        | mailbox, mmio |
-| command  | CMD_RESET      | cmd_reset()          | mailbox       |
-| link     | Bitlock 引擎   | clci_bitlock()       | mmio          |
-| link     | PCS Lock 引擎  | clci_pcslock()       | mmio          |
-| sideband | 协议栈初始化   | sideband_init()      | mmio, irq     |
-| ...      | ...            | ...                  | ...           |
+| Module    | 功能           | 入口函数            | 通信    |
+|-----------|---------------|--------------------|---------|
+| scheduler | 任务调度       | schedule_task()   | db, event |
+| scheduler | 任务重试       | retry_failed()    | db, event |
+| api       | 创建任务       | handleCreateTask()| http    |
+| api       | 查询状态       | handleGetStatus() | http    |
+| queue     | 消息入队       | Enqueue()         | event   |
+| ...       | ...           | ...               | ...     |
 
-## 表 3 — Feature Switches (23 total)
-| 宏                                     | 默认值 | 作用              |
-|----------------------------------------|--------|-------------------|
-| SIDEBAND_UCIE_INIT_MODE_SET_SUPPORT    | 1      | SB init HW 复位   |
-| AUTO_LINK_MODE                         | 0      | 自动 Link 模式    |
-| DOORBELL_MODE_ISR                      | 0      | Doorbell 中断模式 |
-| SIDEBAND_MODE_ISR                      | 0      | Sideband 中断模式 |
-| ...                                    | ...    | ...               |
+## 表 3 — Feature Switches (15 total)
+| 开关                    | 默认值 | 作用           |
+|-------------------------|--------|---------------|
+| ENABLE_RETRY            | true   | 失败重试       |
+| MAX_RETRY_COUNT         | 3      | 最大重试次数   |
+| QUEUE_BACKEND           | rabbitmq| 队列后端选择  |
+| DB_MAX_CONNECTIONS      | 100    | 数据库连接池   |
+| ENABLE_GRACEFUL_SHUTDOWN| true   | 优雅关闭      |
+| ...                     | ...    | ...           |
 
-## 表 4 — Product Variance (8 products)
-| 产品 | CHIPID      | Chiplet | 特性         |
-|------|-------------|---------|-------------|
-| sep1 | 0x251100ab  | SP      | link+doorbell|
-| otp2 | 0x250500ab  | AP      | 64 lanes    |
-| slp1 | ?           | M2-SL   | Soft Link   |
-| ...  | ...         | ...     | ...         |
-
-统计: 6 modules | 37 indexed | 23 switches | 8 products | GOD NODE: cmd_parser (33 edges)
+统计: 5 modules | 386 indexed | 15 switches | GOD NODE: db.ExecContext() (47 callers)
 ```
 
 **生成 HTML 交互报告**：
@@ -309,45 +291,34 @@ pip install cairosvg
 # → code-diagram/features-report.html
 ```
 
-HTML 报告包含可折叠的表格、颜色标记的模块标签、GOD NODE 红框高亮。
-
 ### Step 5: `--review` 代码审查
 
 ```bash
 /code-diagram --review
 ```
 
-**终端输出**：
+**输出**：
 
 ```
-Code Review — clci_combo
-Grade: C  |  🔴12 🟡9 ⚠1
+Code Review — task-scheduler
+Grade: B+  |  🔴2 🟡4 ⚠0
 
-🔴 R2: High Blast Radius (6 findings)
-  sideband_drv_msg_cmd()  [C3] — 10 callers
-  mbd_main_state_change() [C1] — 9 callers
-  💡 Add regression test covering all callers. Commit with [HIGH-RISK] tag.
+🔴 R2: High Blast Radius (2 findings)
+  db.ExecContext() — 47 callers (database bottleneck)
+  config.Get()     — 12 callers (global config singleton)
+  💡 Add regression tests. Consider connection pooling limits.
 
-🔴 R4: Fixed-Address Structs (2 findings)
-  clci_config_t @ 0x17c00 — HW 地址映射, 字段顺序不可变
-  clci_die_t     @ 0x17d00 — HW 地址映射, 字段顺序不可变
-  💡 Add static_assert(sizeof(X) == expected). Sync with HW CSR spreadsheet.
+🟡 R1: Return Value Not Checked (2 findings)
+  queue.Enqueue() in handleCreateTask() — error not checked
+  💡 Add: if err := queue.Enqueue(task); err != nil { ... }
 
-🟡 R5: Error Not Reported (3 findings)
-  cmd_aphy_init, cmd_sphy_init, cmd_reset — 错误路径无 sys_error_save
-  💡 Add: if(ret){sys_error_save(SYS_ERROR_CLASS_*, ret); return CMD_RESP_FAIL;}
+🟡 R5: Error Not Reported (1 finding)
+  retry_failed() — error path missing structured logging
+  💡 Add: slog.Error("retry exhausted", "task_id", id, "err", err)
 
-🟡 R6: ISR Polling (3 findings)
-  SIDEBAND_MODE_ISR=0, DOORBELL_MODE_ISR=0, UART_MODE_ISR=0
-  💡 Measure worst-case polling latency. Consider ISR mode for production.
-
-🟡 R7: Deep Call Chains (3 findings)
-  cmd_soft_link (depth 6), cmd_clci_link (depth 5), cmd_combo (depth 5)
-  💡 Run gcc -fstack-usage to confirm peak stack < IRQ stack reserve (2KB).
-
-⚠ R8: FP Bindings — Single Product
-  18 function pointers only bound in product/sep1/src/
-  💡 Audit other 7 products for platform_clci_api_init() coverage.
+🟡 R7: Deep Call Chains (1 finding)
+  schedule_task → validateTask → db.ExecContext → sql.DB.conn (depth 4)
+  💡 Consider flattening: inline validateTask into schedule_task
 ```
 
 **HTML 报告**（`--html`）：
@@ -357,42 +328,30 @@ Grade: C  |  🔴12 🟡9 ⚠1
 # → code-diagram/review-report.html
 ```
 
-HTML 报告结构：
-- 渐变色 header + 项目元信息
-- 风险卡片：🔴12 🟡9 ⚠1 + Overall Grade **C**
-- 8 个可折叠检查区域（点击标题展开/折叠）
-- 每个 finding 卡片含 `💡 Suggested Fix` 折叠区——具体操作步骤
-- 底部 Action Items：按优先级编号（1-5），含代码模板
-
 ### Step 6: `--impact` 变更影响
 
 ```bash
-/code-diagram --impact clci_config_t
+/code-diagram --impact task_config
 ```
 
-**实际输出**：
+**输出**：
 
 ```
-clci_config_t 影响范围:
-  ┌─ 🔴 高: 固定地址 struct @ 0x17c00 (256B)
-  │   字段顺序不可变更 — 与 HW CSR 映射绑定
-  │   添加/删除字段需同步 HW team + clci_board.h
+task_config 影响范围:
+  ┌─ 🟡 中: 被 12 个函数引用
   │
-  ├─ 直接引用 (extern clci_config):
-  │   ├── platform_init()         [C10: clci_platform.c:86]
-  │   ├── sideband_soft_msg_init() [C3: sideband_protocol.c:336]
-  │   └── fw_info_init()          [C10: clci_platform.c:102]
+  ├─ 直接引用:
+  │   ├── config.Load()        [config: config.go:45]
+  │   ├── main()               [cmd: main.go:28]
+  │   └── scheduler.Init()     [scheduler: scheduler.go:65]
   │
   ├─ 字段级引用:
-  │   ├── cfg5.tracking_lane → clci_link.c:384 (delay line)
-  │   ├── die[0..1]          → clci_reg_read/write() ×60+
-  │   ├── sbd_soft_msg[4]    → sideband_protocol.c
-  │   └── sys_exc_reg[4]     → sys_error.c
+  │   ├── MaxRetries        → retry_failed()
+  │   ├── QueueBackend      → queue.New()
+  │   └── DBMaxConnections  → db.NewPool()
   │
-  └─ 间接影响 (via clci_die_t):
-      ├── clci_reg_read/write()   60+ sites
-      ├── clci_set_link_status()   4 sites
-      └── bitlock/pcslock 全部子函数
+  └─ 间接影响 (via config.Get()):
+      └── 12 files across 4 modules
 ```
 
 ### Step 7: `-t` 生成技术图
@@ -400,68 +359,66 @@ clci_config_t 影响范围:
 #### 活动图
 
 ```bash
-/code-diagram -t activity cmd_clci_link
+/code-diagram -t activity schedule_task
 ```
 
-生成 `cmd_clci_link_flow.puml`，自动渲染为 SVG (72KB) + PNG (248KB, 1920px)。
-
-图包含：5 个 partition 分组（FW/Product/Bitlock/PCS Lock/MAC+Doorbell）、22 个源码链接、8 个决策菱形、MCU IRQ/Doorbell 语义标注。
+生成 `schedule_task_flow.puml`，自动渲染 SVG + PNG。图包含：3 个 partition（scheduler / queue / db）、条件分支（task valid? / db ok?）、通信标注（[rpc] [event] [http]）。
 
 #### 时序图
 
 ```bash
-/code-diagram -t sequence cmd_clci_link
+/code-diagram -t sequence schedule_task
 ```
 
-生成 SDK→Mailbox→FW→PHY 跨层消息交互图，7 色箭头（mmio/mailbox/sideband/irq/...）。
+生成 API → Scheduler → DB → Queue 的跨服务消息流，4 色箭头区分 rpc / db / event / http。
 
 #### ER 图
 
 ```bash
-/code-diagram -t er clci_config_t
+/code-diagram -t er task_config
 ```
 
-生成 struct 关系图：`clci_config_t` → 嵌入 `clci_cfg2_t`/`cfg3_t`/`cfg5_t` → 包含 `clci_die_t[2]` → 引用 `clci_api_t*`。基址标注 @0x17c00。
+生成 struct 关系图：`TaskConfig` → 嵌入 `QueueConfig`/`DBConfig` → 引用 `RetryPolicy`。
 
 #### Mermaid 轻量图
 
 ```bash
-/code-diagram --mermaid -t flow ber_check
+/code-diagram --mermaid -t flow retry_failed
 ```
 
-输出内嵌 Markdown 代码块，可直接放在文档中。节点数 ≤15 时自动推荐 Mermaid。
+输出内嵌 ` ```mermaid ` 代码块，≤15 节点时自动推荐 Mermaid。
 
 #### WaveDrom 波形图
 
 ```bash
-/code-diagram -t timing clci_bitlock
+/code-diagram -t timing retry_timeline
 ```
 
-生成 bitlock phase 推进的并行信号波形（9 通道：bitlock_en / state_check / trigger / phase0_data / phase0_clk / delay_cal / phase1）。
+生成重试时序波形（4 通道：attempt / wait / process / done）。
 
 ### Step 8: `--error-path` 错误传播
 
 ```bash
-/code-diagram --error-path cmd_clci_link
+/code-diagram --error-path schedule_task
 ```
 
-**实际输出**：
+**输出**：
 
 ```
-错误传播路径 (cmd_clci_link):
-  cmd_clci_link()  [clci_command.c:370]
-  ├── [err] ret != 0
-  │   ├── clci_write(die0, DOORBELL, LINK_FAIL_BIT)  [irq → SOC]
-  │   └── clci_write(die1, DOORBELL, LINK_FAIL_BIT)  [irq → SOC]
-  └── [err] sys_error_save(SYS_ERROR_CLASS_LINK, ret)
-      └── sys_exc_reg[0..3] ← 错误快照 (64B)
-          └── SOC 端: clci_get_reg(0, SYS_EXC_REG_ADDR) → 诊断日志
+错误传播路径 (schedule_task):
+  schedule_task()  [scheduler.go:142]
+  ├── [err] task invalid → http.StatusBadRequest
+  ├── [err] db insert fail
+  │   ├── tx.Rollback()
+  │   └── http.StatusInternalServerError + slog.Error()
+  └── [err] queue publish fail
+      ├── compensating: db.DeleteTask(id)
+      └── http.StatusServiceUnavailable + alerting.PagerDuty()
 
 错误码分类:
-  SYS_ERROR_CLASS_LINK       → bitlock/pcslock/link training 失败
-  SYS_ERROR_CLASS_BITLOCK    → bitlock phase check 超时
-  SYS_ERROR_CLASS_PCSLOCK    → pcslock rx/sync/link 超时
-  SYS_ERROR_CLASS_APHY_PLL   → APHY PLL 初始化失败
+  ErrTaskInvalid      → 400 (客户端错误)
+  ErrDBUnavailable    → 500 (数据库不可用)
+  ErrQueueUnavailable → 503 (队列不可用，已触发补偿)
 ```
 
 ---
@@ -470,13 +427,13 @@ clci_config_t 影响范围:
 
 `--init` 自动检测并匹配 preset。Preset 决定审查检查项和语义标注。
 
-| Preset | 检测信号 | 专属检查 |
-|--------|---------|---------|
-| **embedded-firmware** | ISR + MMIO + `while(1)` + `0x...` 地址 | R3 轮询 timeout, R4 固定地址 struct, R6 ISR polling |
-| **rest-service** | HTTP router + DB driver + middleware | R3 连接池耗尽, R4 SQL 注入, R6 graceful shutdown, R9 未关闭连接 |
-| **cli-tool** | `add_command` / cobra / argparse | R1 参数校验, R5 stderr 错误输出 |
-| **library** | 无 `main()`, 大量公共 API | R8 接口稳定性, R2 破坏性变更影响面 |
-| **general** | 无法匹配上述 | R1/R2/R5/R7/R8 通用检查 |
+| Preset | 检测信号 | 专属检查 | 示例项目 |
+|--------|---------|---------|---------|
+| **embedded-firmware** | ISR + MMIO + `while(1)` + `0x...` 地址 | 轮询 timeout, 固定地址 struct, ISR polling | 设备驱动、MCU 固件 |
+| **rest-service** | HTTP router + DB driver + middleware | 连接池耗尽, SQL 注入, graceful shutdown, 未关闭连接 | `task-scheduler` 等 |
+| **cli-tool** | `add_command` / cobra / argparse | 参数校验, stderr 错误输出 | 命令行工具 |
+| **library** | 无 `main()`, 大量公共 API | 接口稳定性, 破坏性变更影响面 | SDK、框架 |
+| **general** | 无法匹配上述 | R1/R2/R5/R7/R8 通用检查 | 通用项目 |
 
 ---
 
@@ -500,43 +457,37 @@ clci_config_t 影响范围:
 
 ### Q: `--index` 扫到了 toolchain/vendor 目录？
 
-工具链和 vendor 目录会自动排除（匹配 `*/lib/gcc/*`, `*/include/c++/*` 等模式）。如果还有遗漏，在 `.code-diagram.json` 中配置 `exclude_dirs`。
+工具链路径会自动排除（匹配 `*/lib/gcc/*`, `*/include/c++/*` 等模式）。如果还有遗漏，在 `.code-diagram.json` 中配置 `exclude_dirs`。
 
-### Q: `--features` 报告里函数数太少 / API 数为 0？
+### Q: `--features` 函数数太少 / API 数为 0？
 
-这是已知的自适应算法陷阱（SKILL.md §Algorithm Heuristics H1-H15）。通常原因：
-1. 项目使用了非标准类型（正则没匹配到）→ `--index` 重建索引会自动学习
-2. 评分阈值不匹配项目类型 → 检查 `.code-diagram.json` 的 `preset` 是否正确
-3. 运行 `--index --no-cache` 看慢扫描能否发现更多
+检查 `.code-diagram.json` 的 `preset` 是否正确。如果 preset 是 `general` 但项目实际是 Go REST 服务，手动改为 `rest-service` 后重建索引。
 
 ### Q: 如何切换快扫描（索引）和慢扫描（grep）？
 
 ```bash
 /code-diagram --tree func             # 默认: 索引存在 → 快 (毫秒)
-/code-diagram --tree func --no-cache  # 强制慢扫描 (grep 源码, 秒级)
+/code-diagram --tree func --no-cache  # 强制慢扫描 (grep 源码)
 ```
 
 ### Q: PlantUML 渲染报错？
 
-常见原因：`!include` 路径不存在、PlantUML 版本过旧。最低版本 1.2024.x。
-
 ```bash
-plantuml -version               # 检查版本
+plantuml -version               # 最低 1.2024.x
 brew upgrade plantuml           # 升级
-# 或者用 -I 指定 include 路径
-plantuml -I <skill-dir>/styles -tsvg file.puml
+plantuml -I <skill-dir>/styles -tsvg file.puml  # 指定 include 路径
 ```
 
 ### Q: 能在 CI 中使用吗？
 
-可以。`scripts/` 下的 Python 脚本零外部依赖（只用 stdlib），可以直接在 CI pipeline 中调用：
+可以。`scripts/` 下的 Python 脚本只用 stdlib。
 
 ```yaml
 # GitHub Actions 示例
 - name: Code Review
   run: |
     python3 scripts/build-index.py --project .
-    python3 scripts/review-report.py
+    python3 scripts/generate-review-report.py
 ```
 
 ---
