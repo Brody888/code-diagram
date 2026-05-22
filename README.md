@@ -125,22 +125,71 @@ python3 scripts/build-index.py --help
 
 ### Dependencies
 
-| Tool | Purpose | Required? | Install |
-|------|---------|-----------|---------|
-| **Python 3.9+** | Index building, feature discovery, code review | ✅ Required | System or `brew install python` |
-| `plantuml` | Activity/sequence/ER diagram SVG rendering | Optional | `brew install plantuml` |
-| `cairosvg` | PNG export (recommended) | Optional | `pip install cairosvg` |
-| `rsvg-convert` | PNG export (fallback) | Optional | `brew install librsvg` |
-| `mmdc` | Mermaid diagram SVG rendering | Optional | `npm install -g @mermaid-js/mermaid-cli` |
-| `wavedrom-cli` | WaveDrom SVG rendering | Optional | `npm install -g wavedrom-cli` |
+| Tool | Purpose | Required? |
+|------|---------|-----------|
+| **Python 3.9+** | Index building, feature discovery, code review | ✅ Required |
+| `plantuml` | Activity/sequence/ER diagram SVG rendering | Optional |
+| `cairosvg` | PNG export (recommended) | Optional |
+| `rsvg-convert` | PNG export (fallback) | Optional |
+| `mmdc` | Mermaid diagram SVG rendering | Optional |
+| `wavedrom-cli` | WaveDrom SVG rendering | Optional |
+
+**macOS**:
 
 ```bash
-# macOS one-liner for all optional deps
 brew install plantuml librsvg python
 pip install cairosvg
+```
 
-# Skip PNG export entirely:
-/code-diagram -t activity my_func --no-png
+**Linux (Debian/Ubuntu)**:
+
+```bash
+sudo apt update
+sudo apt install -y plantuml librsvg2-bin python3 python3-pip
+pip install cairosvg
+```
+
+**Linux (RHEL/Fedora)**:
+
+```bash
+sudo dnf install -y plantuml librsvg2-tools python3 python3-pip
+pip install cairosvg
+```
+
+**Windows (PowerShell)**:
+
+```powershell
+# Python (if not already installed)
+winget install Python.Python.3.12
+
+# PlantUML (requires Java)
+winget install Oracle.JavaRuntimeEnvironment
+# Download plantuml.jar from https://plantuml.com/download
+# Or use Chocolatey:
+choco install plantuml
+
+# CairoSVG
+pip install cairosvg
+
+# rsvg-convert (via Chocolatey)
+# choco install rsvg-convert
+```
+
+> Skip diagram rendering entirely by adding `--no-png`:
+> ```bash
+> /code-diagram -t activity my_func --no-png
+> ```
+
+### Platform-specific Paths
+
+| Platform | Claude Code skills directory |
+|----------|----------------------------|
+| macOS / Linux | `~/.claude/skills/code-diagram` |
+| Windows | `%USERPROFILE%\.claude\skills\code-diagram` |
+
+```powershell
+# Windows: clone into Claude Code skills directory
+git clone https://github.com/Brody888/code-diagram.git $env:USERPROFILE\.claude\skills\code-diagram
 ```
 
 ---

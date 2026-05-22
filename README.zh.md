@@ -125,22 +125,65 @@ python3 scripts/build-index.py --help
 
 ### 依赖说明
 
-| 工具 | 用途 | 必须？ | 安装方式 |
-|------|------|--------|---------|
-| **Python 3.9+** | 索引构建、功能发现、代码审查 | ✅ 必须 | 系统自带 或 `brew install python` |
-| `plantuml` | 活动图/时序图/ER 图 SVG 渲染 | 可选 | `brew install plantuml` |
-| `cairosvg` | PNG 导出（推荐） | 可选 | `pip install cairosvg` |
-| `rsvg-convert` | PNG 导出（备选） | 可选 | `brew install librsvg` |
-| `mmdc` | Mermaid 图 SVG 渲染 | 可选 | `npm install -g @mermaid-js/mermaid-cli` |
-| `wavedrom-cli` | WaveDrom 波形图 SVG 渲染 | 可选 | `npm install -g wavedrom-cli` |
+| 工具 | 用途 | 必须？ |
+|------|------|--------|
+| **Python 3.9+** | 索引构建、功能发现、代码审查 | ✅ 必须 |
+| `plantuml` | 活动图/时序图/ER 图 SVG 渲染 | 可选 |
+| `cairosvg` | PNG 导出（推荐） | 可选 |
+| `rsvg-convert` | PNG 导出（备选） | 可选 |
+| `mmdc` | Mermaid 图 SVG 渲染 | 可选 |
+| `wavedrom-cli` | WaveDrom 波形图 SVG 渲染 | 可选 |
+
+**macOS**：
 
 ```bash
-# macOS 一键安装全部可选依赖
 brew install plantuml librsvg python
 pip install cairosvg
+```
 
-# 如果不需要 PNG 导出，可以跳过所有可选依赖：
-/code-diagram -t activity process_job --no-png   # 只生成 .puml 源文件
+**Linux (Debian/Ubuntu)**：
+
+```bash
+sudo apt update
+sudo apt install -y plantuml librsvg2-bin python3 python3-pip
+pip install cairosvg
+```
+
+**Linux (RHEL/Fedora)**：
+
+```bash
+sudo dnf install -y plantuml librsvg2-tools python3 python3-pip
+pip install cairosvg
+```
+
+**Windows (PowerShell)**：
+
+```powershell
+# Python（如未安装）
+winget install Python.Python.3.12
+
+# PlantUML（需要 Java）
+winget install Oracle.JavaRuntimeEnvironment
+# 从 https://plantuml.com/download 下载 plantuml.jar
+# 或使用 Chocolatey：
+choco install plantuml
+
+# CairoSVG
+pip install cairosvg
+```
+
+> 跳过 PNG 导出：`/code-diagram -t activity my_func --no-png`
+
+### 平台路径
+
+| 平台 | Claude Code skills 目录 |
+|------|-----------------------|
+| macOS / Linux | `~/.claude/skills/code-diagram` |
+| Windows | `%USERPROFILE%\.claude\skills\code-diagram` |
+
+```powershell
+# Windows: 克隆到 Claude Code skills 目录
+git clone https://github.com/Brody888/code-diagram.git $env:USERPROFILE\.claude\skills\code-diagram
 ```
 
 ---
