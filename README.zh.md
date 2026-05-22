@@ -37,6 +37,7 @@
 | `--init` | 自动检测项目：语言、构建系统、框架、模块结构、开关宏、错误模型 | `<项目根>/.code-diagram.json` | JSON |
 | `--index` | 构建全量调用图索引（函数定义 + CLI 命令 + 公共 API + 开关宏） | `<项目根>/code-diagram/<project>.json` | JSON |
 | `--tree <func>` | 调用链树追踪（递归 3 层，标注通信模式） | 终端 stdout | 缩进树 |
+| `--filetree` | 项目文件结构树（含每个文件的主要作用和入口函数） | 终端 stdout | 目录树 |
 | `--features` | 项目功能清单（5 表：模块/功能/开关/产品/中断） | `code-diagram/features-report.md` | Markdown / HTML |
 | `--review` | 代码审查 + 风险评估（15 项检查 + Fix 建议 + Grade） | `code-diagram/review-report.md` | Markdown / HTML |
 | `--impact <symbol>` | 变更影响分析（改了 X 影响什么） | 终端 stdout | 反向依赖树 |
@@ -261,6 +262,40 @@ Scanning: /Users/me/projects/task-scheduler
 
 ✓ task-scheduler/code-diagram/task-scheduler.json
   386 funcs | 12 CLI | 47 APIs | 15 switches
+```
+
+### Step 2.5: `--filetree` 文件结构树
+
+```bash
+/code-diagram --filetree
+```
+
+**输出**：
+
+```
+task-scheduler/
+├── cmd/
+│   └── scheduler/
+│       └── main.go               (4 funcs) — 程序入口  ← initConfig
+├── internal/
+│   ├── api/
+│   │   ├── handler.go           (12 funcs ★) — API Handler  ← handleCreateTask, handleGetStatus
+│   │   └── middleware.go         (5 funcs) — API Handler  ← authMiddleware, rateLimit
+│   ├── scheduler/
+│   │   ├── scheduler.go         (18 funcs ★) — 核心逻辑  ← schedule_task, retry_failed
+│   │   └── validator.go          (4 funcs) — 核心逻辑  ← validateTask
+│   ├── queue/
+│   │   └── rabbitmq.go           (8 funcs) — 消息通信 ← GOD NODE  ← Enqueue, Dequeue
+│   └── db/
+│       ├── postgres.go           (10 funcs ★) — 核心逻辑  ← InsertTask, NewPool ← conn.ExecContext
+│       └── migrations.go         (3 funcs) — 核心逻辑
+├── config/
+│   └── config.go                 (8 funcs) — 配置/Feature Flags  ← Load, Get ← 12 callers
+├── go.mod
+└── go.sum
+
+图例: ★ = 10+ 函数  ← = 公共 API  📎 = CLI 命令入口
+总文件: 12 (含源码定义)  | 总函数: 72
 ```
 
 ### Step 3: `--tree` 调用链追踪

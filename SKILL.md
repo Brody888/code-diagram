@@ -104,6 +104,7 @@
   --tree <func>        调用链树
   --features [子系统]   功能清单
   --review             代码审查 (HTML 报告)
+  --filetree            文件结构树 (含每个文件的主要作用)
   --impact <symbol>    变更影响分析
   --error-path <func>  错误传播追踪
   -t <type> <target>   生成指定类型的技术图

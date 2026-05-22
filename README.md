@@ -37,6 +37,7 @@ Generate technical diagrams, feature inventories, and code review reports from s
 | `--init` | Auto-detect project: language, build system, framework, modules, feature flags, error model | `.code-diagram.json` | JSON |
 | `--index` | Build full call graph index (functions + CLI commands + public APIs + feature flags) | `code-diagram/<project>.json` | JSON |
 | `--tree <func>` | Call chain tracing (3 levels deep, communication mode annotations) | stdout | Indented tree |
+| `--filetree` | File structure tree (annotated with function counts, roles, entry points) | stdout | Directory tree |
 | `--features` | Feature inventory (5 tables: modules/features/flags/products/events) | `code-diagram/features-report.md` | Markdown / HTML |
 | `--review` | Code review + risk assessment (15 checks + fix suggestions + grade) | `code-diagram/review-report.md` | Markdown / HTML |
 | `--impact <symbol>` | Change impact analysis (what breaks if X changes) | stdout | Reverse dependency tree |
@@ -267,6 +268,40 @@ Generated `.code-diagram.json`:
 
 ✓ task-scheduler/code-diagram/task-scheduler.json
   386 funcs | 12 CLI | 47 APIs | 15 switches
+```
+
+### Step 2.5: `--filetree` File Structure Tree
+
+```bash
+/code-diagram --filetree
+```
+
+**Output**:
+
+```
+task-scheduler/
+├── cmd/
+│   └── scheduler/
+│       └── main.go               (4 funcs) — 程序入口  ← initConfig
+├── internal/
+│   ├── api/
+│   │   ├── handler.go           (12 funcs ★) — API Handler  ← handleCreateTask, handleGetStatus
+│   │   └── middleware.go         (5 funcs) — API Handler  ← authMiddleware, rateLimit
+│   ├── scheduler/
+│   │   ├── scheduler.go         (18 funcs ★) — 核心逻辑  ← schedule_task, retry_failed
+│   │   └── validator.go          (4 funcs) — 核心逻辑  ← validateTask
+│   ├── queue/
+│   │   └── rabbitmq.go           (8 funcs) — 消息通信 ← GOD NODE  ← Enqueue, Dequeue
+│   └── db/
+│       ├── postgres.go           (10 funcs ★) — 核心逻辑  ← InsertTask, NewPool ← conn.ExecContext
+│       └── migrations.go         (3 funcs) — 核心逻辑
+├── config/
+│   └── config.go                 (8 funcs) — 配置/Feature Flags  ← Load, Get ← 12 callers
+├── go.mod
+└── go.sum
+
+图例: ★ = 10+ 函数  ← = 公共 API  📎 = CLI 命令入口
+总文件: 12 (含源码定义)  | 总函数: 72
 ```
 
 ### Step 3: `--tree` Call Chain Tracing
