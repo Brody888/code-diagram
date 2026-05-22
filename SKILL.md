@@ -590,6 +590,7 @@ H11-H12 在每次生成 `.puml` 时检查；H13 在验证脚本中自动应用�
 ├── .code-diagram.json          # --init 生成的配置
 └── code-diagram/
     ├── <project>.json           # --index 的索引
+    ├── filetree.md              # --filetree 文件结构报告
     ├── features-report.md       # --features 报告 (--html → .html)
     ├── review-report.md         # --review 报告 (--html → .html)
     └── *.puml / *.svg / *.png   # -t 生成的图

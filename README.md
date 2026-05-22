@@ -529,6 +529,7 @@ Error code classification:
 ├── .code-diagram.json          # --init configuration
 └── code-diagram/
     ├── <project>.json           # --index full call graph
+    ├── filetree.md              # --filetree file structure report
     ├── features-report.md       # --features report
     ├── features-report.html     # --features --html
     ├── review-report.md         # --review report

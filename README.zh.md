@@ -524,6 +524,7 @@ task_config 影响范围:
 ├── .code-diagram.json          # --init 生成的配置
 └── code-diagram/
     ├── <project>.json           # --index 的索引 (全量调用图)
+    ├── filetree.md              # --filetree 文件结构报告
     ├── features-report.md       # --features 报告
     ├── features-report.html     # --features --html
     ├── review-report.md         # --review 报告
