@@ -485,7 +485,7 @@ bash <skill-dir>/scripts/export-diagram.sh file.puml -w 1920
 }
 ```
 
-> 完整示例见 `examples/` 目录（含 CLCI embedded-firmware、REST service、CLI tool 等项目类型的实际数据）。
+> 领域专用示例见私有仓库 `Brody888/code-diagram-examples`（CLCI embedded-firmware 等）。通用示例见 README。
 
 ---
 
