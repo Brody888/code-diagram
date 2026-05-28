@@ -67,8 +67,3 @@ Re-index after code changes: `python3 scripts/build-index-ts.py --project /path`
 C (full AST), Python (full AST), plus Go, Rust, Java, JS/TS with optional grammars.
 Falls back to regex parsing for anything without a tree-sitter grammar installed.
 
-## Tested On
-
-| Project            | Language | Functions | Call Edges | Coverage |
-|--------------------|----------|-----------|------------|----------|
-| clci-firmware v1.6 | C        | 709       | 821        | 84%      |
