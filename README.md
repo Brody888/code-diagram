@@ -7,18 +7,23 @@ Tree-sitter AST code indexer → MCP server → query call graphs inside Hermes.
 ```bash
 git clone https://github.com/Brody888/code-diagram.git
 cd code-diagram-mcp
-make setup PROJECT=/path/to/your-codebase
+python3 setup.py /path/to/your-codebase
 ```
 
-That's it. The `make setup` command will:
+One command. Works on macOS, Linux, and Windows.
 
-1. Install all dependencies (`pip install -e .`)
-2. Auto-detect language, framework, build system
-3. Build the AST index (functions, call graph, types)
-4. Print the MCP config snippet — paste into `~/.hermes/config.yaml`
-5. Then `/reload-mcp` in Hermes and you're done
+`setup.py` handles everything:
 
-Re-index after code changes: `make index PROJECT=/path/to/your-codebase`
+1. Installs dependencies (`tree-sitter` + C/Python grammars)
+2. Auto-detects language, framework, build system
+3. Builds AST index (functions, call graph, types)
+4. Prints the MCP config snippet → paste into `~/.hermes/config.yaml`
+
+Then `/reload-mcp` in Hermes.
+
+For all language grammars: `python3 setup.py /path --all-languages`
+
+Re-index after code changes: `python3 scripts/build-index-ts.py --project /path`
 
 ## Hermes Tools
 
