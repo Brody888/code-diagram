@@ -1,13 +1,26 @@
 # code-diagram-mcp
 
-Tree-sitter AST code indexer → MCP server → query call graphs inside Hermes.
+Tree-sitter AST code indexer → MCP server → query call graphs inside your AI coding tool.
+
+Works with **Hermes Agent, Claude Code, Codex CLI, OpenClaw** — anything that speaks MCP.
 
 ## Quick Start
 
 ```bash
 git clone https://github.com/Brody888/code-diagram.git
 cd code-diagram-mcp
+
+# Hermes Agent (default)
 python3 setup.py /path/to/your-codebase
+
+# Claude Code
+python3 setup.py /path/to/your-codebase --tool claude
+
+# Codex CLI
+python3 setup.py /path/to/your-codebase --tool codex
+
+# OpenClaw
+python3 setup.py /path/to/your-codebase --tool openclaw
 ```
 
 One command. Works on macOS, Linux, and Windows.
@@ -17,15 +30,22 @@ One command. Works on macOS, Linux, and Windows.
 1. Installs dependencies (`tree-sitter` + C/Python grammars)
 2. Auto-detects language, framework, build system
 3. Builds AST index (functions, call graph, types)
-4. Prints the MCP config snippet → paste into `~/.hermes/config.yaml`
+4. Prints the MCP config — ready to paste
 
-Then `/reload-mcp` in Hermes.
-
-For all language grammars: `python3 setup.py /path --all-languages`
+For all language grammars: add `--all-languages`.
 
 Re-index after code changes: `python3 scripts/build-index-ts.py --project /path`
 
-## Hermes Tools
+## How Each Tool Configures
+
+| Tool          | Config file                        | Auto?                    |
+|---------------|------------------------------------|--------------------------|
+| Hermes Agent  | `~/.hermes/config.yaml`            | Paste + `/reload-mcp`    |
+| Claude Code   | `.mcp.json` or `~/.claude/mcp.json`| `claude mcp add` if CLI  |
+| Codex CLI     | `~/.codex/config.toml`             | Paste + restart          |
+| OpenClaw      | `config.yaml`                      | Paste + restart          |
+
+## MCP Tools
 
 | Tool           | Description                              |
 |----------------|------------------------------------------|
