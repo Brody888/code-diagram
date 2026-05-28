@@ -1,37 +1,24 @@
 # code-diagram-mcp
 
-Tree-sitter based code indexer with MCP server for Hermes Agent.
-Query function call graphs, module stats, and code structure directly from Hermes.
+Tree-sitter AST code indexer → MCP server → query call graphs inside Hermes.
 
 ## Quick Start
 
 ```bash
-# 1. Clone
-git clone https://github.com/Brody888/code-diagram.git ~/code-diagram-mcp
-
-# 2. Install tree-sitter + language grammars (Python 3.12+)
-pip3 install tree-sitter tree-sitter-c tree-sitter-python
-
-# Optional: other languages
-pip3 install tree-sitter-go tree-sitter-rust tree-sitter-java \
-            tree-sitter-javascript tree-sitter-typescript
-
-# 3. Init + index your project
-python3 scripts/init-project.py /path/to/your-project
-python3 scripts/build-index-ts.py --project /path/to/your-project
-
-# 4. Add MCP server to ~/.hermes/config.yaml
-#    (under mcp_servers:)
-#  code-diagram:
-#    command: python3.12
-#    args:
-#    - /Users/you/code-diagram-mcp/mcp_server.py
-#    - --project
-#    - /path/to/your-project
-
-# 5. Reload in Hermes
-/reload-mcp
+git clone https://github.com/Brody888/code-diagram.git
+cd code-diagram-mcp
+make setup PROJECT=/path/to/your-codebase
 ```
+
+That's it. The `make setup` command will:
+
+1. Install all dependencies (`pip install -e .`)
+2. Auto-detect language, framework, build system
+3. Build the AST index (functions, call graph, types)
+4. Print the MCP config snippet — paste into `~/.hermes/config.yaml`
+5. Then `/reload-mcp` in Hermes and you're done
+
+Re-index after code changes: `make index PROJECT=/path/to/your-codebase`
 
 ## Hermes Tools
 
@@ -46,26 +33,13 @@ python3 scripts/build-index-ts.py --project /path/to/your-project
 | `cd_switches`  | Feature flags / #define switches         |
 | `cd_products`  | Product variants / build targets         |
 
-## Requirements
-
-- **Python 3.12+** — tree-sitter 0.24+ needs it
-- **tree-sitter** (`pip install tree-sitter`)
-- Language grammars as Python packages (e.g. `tree-sitter-c`, `tree-sitter-python`)
-- Falls back to regex parsing if tree-sitter grammars are missing
-
 ## Supported Languages
 
-| Language     | Package                    | AST parsing |
-|-------------|----------------------------|-------------|
-| C/C++       | `tree-sitter-c`            | ✅ full     |
-| Python      | `tree-sitter-python`       | ✅ full     |
-| Go          | `tree-sitter-go`           | ✅ full     |
-| Rust        | `tree-sitter-rust`         | ✅ full     |
-| Java        | `tree-sitter-java`         | ✅ full     |
-| JS/TS       | `tree-sitter-javascript/typescript` | ✅ |
-| Other       | (regex fallback)           | ⚠️ basic   |
+C (full AST), Python (full AST), plus Go, Rust, Java, JS/TS with optional grammars.
+Falls back to regex parsing for anything without a tree-sitter grammar installed.
 
 ## Tested On
 
-- **clci-firmware** (C, embedded): 709 functions, 320 structs, 821 call edges, 84% coverage
-- **Hermes Agent** (Python): function call graph, module stats
+| Project            | Language | Functions | Call Edges | Coverage |
+|--------------------|----------|-----------|------------|----------|
+| clci-firmware v1.6 | C        | 709       | 821        | 84%      |

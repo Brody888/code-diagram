@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "code-diagram-mcp"
+version = "0.2.0"
+description = "Tree-sitter AST code indexer with MCP server for Hermes Agent"
+requires-python = ">=3.12"
+
+dependencies = [
+    "tree-sitter>=0.24",
+    "tree-sitter-c>=0.23",
+    "tree-sitter-python>=0.23",
+]
+
+[project.optional-dependencies]
+all = [
+    "tree-sitter-go>=0.23",
+    "tree-sitter-rust>=0.23",
+    "tree-sitter-java>=0.23",
+    "tree-sitter-javascript>=0.23",
+    "tree-sitter-typescript>=0.23",
+]
+
+[tool.setuptools]
+py-modules = []
