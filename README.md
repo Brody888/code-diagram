@@ -21,6 +21,9 @@ python3 setup.py /path/to/your-codebase --tool codex
 
 # OpenClaw
 python3 setup.py /path/to/your-codebase --tool openclaw
+
+# TRAE IDE
+python3 setup.py /path/to/your-codebase --tool trae
 ```
 
 One command. Works on macOS, Linux, and Windows.
@@ -44,6 +47,7 @@ Re-index after code changes: `python3 scripts/build-index-ts.py --project /path`
 | Claude Code   | `.mcp.json` or `~/.claude/mcp.json`| `claude mcp add` if CLI  |
 | Codex CLI     | `~/.codex/config.toml`             | Paste + restart          |
 | OpenClaw      | `config.yaml`                      | Paste + restart          |
+| TRAE IDE      | `.trae/mcp.json`                   | Paste + restart          |
 
 ## MCP Tools
 

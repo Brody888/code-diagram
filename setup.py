@@ -109,11 +109,28 @@ def print_openclaw_config(python: str, server_path: str, project: str):
     print("Then restart OpenClaw.")
 
 
+def print_trae_config(python: str, server_path: str, project: str):
+    config = {
+        "mcpServers": {
+            "code-diagram": {
+                "command": python,
+                "args": [server_path, "--project", project],
+            }
+        }
+    }
+    print("Save as .trae/mcp.json in project root, or set in TRAE Settings → MCP:")
+    print()
+    print(json.dumps(config, indent=2))
+    print()
+    print("Then restart TRAE. In TRAE, go to 设置 → 上下文 → MCP to verify the server is connected.")
+
+
 CONFIGS = {
     "hermes":   ("Hermes Agent", print_hermes_config),
     "claude":   ("Claude Code",  print_claude_config),
     "codex":    ("Codex CLI",    print_codex_config),
     "openclaw": ("OpenClaw",     print_openclaw_config),
+    "trae":     ("TRAE IDE",     print_trae_config),
 }
 
 
