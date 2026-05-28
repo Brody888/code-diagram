@@ -20,6 +20,34 @@
 
 ## Quick Start
 
+### MCP Server（通过 Hermes Agent 直接查询索引）
+
+安装后，Hermes Agent 可以通过 8 个 MCP 工具直接查询代码索引：
+`cd_stats` / `cd_functions` / `cd_modules` / `cd_cli` / `cd_switches` / `cd_products` / `cd_callers` / `cd_callees`
+
+```bash
+# 注册 MCP server（一次性）
+hermes mcp add code-diagram --command python3 --args /path/to/mcp_server.py
+
+# 之后每次 /reload-mcp 或重启 Hermes，Agent 就能直接调用 cd_* 工具查询索引
+```
+
+MCP 工具说明：
+| 工具 | 用途 |
+|------|------|
+| `cd_stats` | 项目概况：语言、函数数、模块数、CLI 命令数 |
+| `cd_functions(query="...")` | 按名称搜索函数 |
+| `cd_modules` | 列出所有模块及函数统计 |
+| `cd_cli` | 列出所有 CLI 注册命令 |
+| `cd_switches` | 列出 #define / feature flags |
+| `cd_products` | 列出产品变体/构建目标 |
+| `cd_callers(function="...")` | 查找谁调用了某个函数 |
+| `cd_callees(function="...")` | 查找某函数调用了谁 |
+
+所有工具支持 `project="/path/to/project"` 参数跨项目查询。
+
+### 传统 CLI 模式
+
 ```
 /code-diagram --init                           # 自动检测项目 → 生成 .code-diagram.json
 /code-diagram --index                          # 构建源码索引（首次必须）
