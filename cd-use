@@ -1,0 +1,47 @@
+#!/usr/bin/env python3
+"""Switch code-diagram MCP default project — no config editing, no reload needed.
+
+Usage:
+    cd-use /path/to/indexed-project
+    cd-use              # show current project
+    cd-use --list       # list all indexed projects found under ~/code/
+"""
+
+import os
+import sys
+from pathlib import Path
+
+PTR = os.path.expanduser("~/.hermes/code-diagram-project")
+
+
+def main():
+    if len(sys.argv) < 2 or sys.argv[1] in ("-h", "--help"):
+        print(__doc__)
+        sys.exit(0)
+
+    if sys.argv[1] == "--list":
+        print("Indexed projects:")
+        for root, dirs, _ in os.walk(os.path.expanduser("~/code")):
+            if ".code-diagram.json" in dirs or ".code-diagram.json" in [f for f in os.listdir(root) if os.path.isfile(os.path.join(root, f))] or os.path.exists(os.path.join(root, ".code-diagram.json")):
+                print(f"  {root}")
+            dirs[:] = [d for d in dirs if not d.startswith(".")][:2]
+        return
+
+    project = os.path.abspath(sys.argv[1])
+    if not os.path.isdir(project):
+        print(f"Error: '{project}' is not a directory.")
+        sys.exit(1)
+    if not os.path.exists(os.path.join(project, ".code-diagram.json")):
+        print(f"Warning: '{project}' has no .code-diagram.json. Run setup first:")
+        print(f"  python3 {Path(__file__).resolve().parent / 'setup.py'} {project}")
+        sys.exit(1)
+
+    os.makedirs(os.path.dirname(PTR), exist_ok=True)
+    with open(PTR, "w") as f:
+        f.write(project + "\n")
+    print(f"✓ Active project: {project}")
+    print("  No reload needed — MCP server reads this file on every query.")
+
+
+if __name__ == "__main__":
+    main()

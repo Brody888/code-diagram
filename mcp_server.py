@@ -329,7 +329,20 @@ TOOL_HANDLERS = {
 }
 
 
-# ── Main loop ───────────────────────────────────────────────────────
+def get_project_root(explicit: str | None = None, cli_default: str | None = None) -> str:
+    """Resolve project root: explicit arg > CLI --project > ~/.hermes/code-diagram-project > cwd."""
+    if explicit:
+        return explicit
+    if cli_default and cli_default != os.getcwd():
+        return cli_default
+    # Check the active-project pointer file
+    ptr = os.path.expanduser("~/.hermes/code-diagram-project")
+    if os.path.exists(ptr):
+        with open(ptr) as f:
+            candidate = f.read().strip()
+            if os.path.isdir(candidate):
+                return candidate
+    return cli_default or os.getcwd()
 
 def main():
     args = sys.argv[1:]
@@ -374,8 +387,9 @@ def main():
             tool_name = params.get("name", "")
             arguments = params.get("arguments", {})
 
-            # Allow per-call project override
-            call_project = arguments.pop("project", None) or project_root
+            # Resolve project: per-call > pointer-file > CLI --project > cwd
+            explicit = arguments.pop("project", None)
+            call_project = get_project_root(explicit, project_root)
 
             handler = TOOL_HANDLERS.get(tool_name)
             if not handler:
