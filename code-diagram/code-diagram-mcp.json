@@ -1,0 +1,345 @@
+{
+  "project": "code-diagram-mcp",
+  "built_at": "2026-05-28T16:17:00.475974",
+  "method": "tree-sitter",
+  "source_root": "/Users/hui/code-diagram-mcp",
+  "language": "?",
+  "framework": "?",
+  "preset": "general",
+  "modules": {
+    "mcp_server.py": {
+      "functions": 14
+    },
+    "scripts": {
+      "functions": 17
+    }
+  },
+  "public_apis": [
+    {
+      "name": "tool_get_callers",
+      "file": "mcp_server.py",
+      "module": "mcp_server.py"
+    },
+    {
+      "name": "log",
+      "file": "mcp_server.py",
+      "module": "mcp_server.py"
+    },
+    {
+      "name": "send_response",
+      "file": "mcp_server.py",
+      "module": "mcp_server.py"
+    },
+    {
+      "name": "send_error",
+      "file": "mcp_server.py",
+      "module": "mcp_server.py"
+    },
+    {
+      "name": "load_index",
+      "file": "mcp_server.py",
+      "module": "mcp_server.py"
+    },
+    {
+      "name": "tool_get_stats",
+      "file": "mcp_server.py",
+      "module": "mcp_server.py"
+    },
+    {
+      "name": "tool_list_cli_commands",
+      "file": "mcp_server.py",
+      "module": "mcp_server.py"
+    },
+    {
+      "name": "tool_get_callees",
+      "file": "mcp_server.py",
+      "module": "mcp_server.py"
+    },
+    {
+      "name": "main",
+      "file": "mcp_server.py",
+      "module": "mcp_server.py"
+    },
+    {
+      "name": "tool_list_switches",
+      "file": "mcp_server.py",
+      "module": "mcp_server.py"
+    },
+    {
+      "name": "tool_list_functions",
+      "file": "mcp_server.py",
+      "module": "mcp_server.py"
+    },
+    {
+      "name": "format_symbol",
+      "file": "mcp_server.py",
+      "module": "mcp_server.py"
+    },
+    {
+      "name": "tool_list_products",
+      "file": "mcp_server.py",
+      "module": "mcp_server.py"
+    },
+    {
+      "name": "tool_list_modules",
+      "file": "mcp_server.py",
+      "module": "mcp_server.py"
+    },
+    {
+      "name": "detect",
+      "file": "scripts/init-project.py",
+      "module": "scripts"
+    },
+    {
+      "name": "fallback_index_python",
+      "file": "scripts/build-index-ts.py",
+      "module": "scripts"
+    },
+    {
+      "name": "infer_language",
+      "file": "scripts/build-index-ts.py",
+      "module": "scripts"
+    },
+    {
+      "name": "TreeSitterIndexer",
+      "file": "scripts/build-index-ts.py",
+      "module": "scripts"
+    },
+    {
+      "name": "__init__",
+      "file": "scripts/build-index-ts.py",
+      "module": "scripts"
+    },
+    {
+      "name": "_load_languages",
+      "file": "scripts/build-index-ts.py",
+      "module": "scripts"
+    },
+    {
+      "name": "has_language",
+      "file": "scripts/build-index-ts.py",
+      "module": "scripts"
+    },
+    {
+      "name": "build_index",
+      "file": "scripts/build-index-ts.py",
+      "module": "scripts"
+    },
+    {
+      "name": "parse_file",
+      "file": "scripts/build-index-ts.py",
+      "module": "scripts"
+    },
+    {
+      "name": "fallback_index_c",
+      "file": "scripts/build-index-ts.py",
+      "module": "scripts"
+    },
+    {
+      "name": "role_of",
+      "file": "scripts/filetree.py",
+      "module": "scripts"
+    },
+    {
+      "name": "print_subtree",
+      "file": "scripts/filetree.py",
+      "module": "scripts"
+    },
+    {
+      "name": "filetree",
+      "file": "scripts/filetree.py",
+      "module": "scripts"
+    },
+    {
+      "name": "report",
+      "file": "scripts/features-report.py",
+      "module": "scripts"
+    },
+    {
+      "name": "max_depth",
+      "file": "scripts/generate-review-report.py",
+      "module": "scripts"
+    },
+    {
+      "name": "findings_html",
+      "file": "scripts/generate-review-report.py",
+      "module": "scripts"
+    },
+    {
+      "name": "build",
+      "file": "scripts/build-index.py",
+      "module": "scripts"
+    }
+  ],
+  "call_graph": {
+    "tool_list_switches": {
+      "callers": [],
+      "callees": [
+        "load_index"
+      ]
+    },
+    "load_index": {
+      "callers": [
+        "tool_list_switches",
+        "tool_get_callees",
+        "tool_list_modules",
+        "tool_list_products",
+        "tool_list_functions",
+        "tool_get_stats",
+        "tool_list_cli_commands",
+        "tool_get_callers"
+      ],
+      "callees": []
+    },
+    "tool_get_callees": {
+      "callers": [],
+      "callees": [
+        "load_index"
+      ]
+    },
+    "main": {
+      "callers": [],
+      "callees": [
+        "send_error",
+        "send_response",
+        "log"
+      ]
+    },
+    "send_error": {
+      "callers": [
+        "main"
+      ],
+      "callees": []
+    },
+    "send_response": {
+      "callers": [
+        "main"
+      ],
+      "callees": []
+    },
+    "log": {
+      "callers": [
+        "main"
+      ],
+      "callees": []
+    },
+    "tool_list_modules": {
+      "callers": [],
+      "callees": [
+        "load_index"
+      ]
+    },
+    "tool_list_products": {
+      "callers": [],
+      "callees": [
+        "load_index"
+      ]
+    },
+    "tool_list_functions": {
+      "callers": [],
+      "callees": [
+        "load_index"
+      ]
+    },
+    "tool_get_stats": {
+      "callers": [],
+      "callees": [
+        "load_index"
+      ]
+    },
+    "tool_list_cli_commands": {
+      "callers": [],
+      "callees": [
+        "load_index"
+      ]
+    },
+    "tool_get_callers": {
+      "callers": [],
+      "callees": [
+        "load_index"
+      ]
+    },
+    "build_index": {
+      "callers": [],
+      "callees": [
+        "has_language",
+        "TreeSitterIndexer",
+        "parse_file"
+      ]
+    },
+    "has_language": {
+      "callers": [
+        "build_index"
+      ],
+      "callees": []
+    },
+    "TreeSitterIndexer": {
+      "callers": [
+        "build_index"
+      ],
+      "callees": []
+    },
+    "__init__": {
+      "callers": [],
+      "callees": [
+        "_load_languages"
+      ]
+    },
+    "_load_languages": {
+      "callers": [
+        "__init__"
+      ],
+      "callees": []
+    },
+    "parse_file": {
+      "callers": [
+        "build_index"
+      ],
+      "callees": []
+    },
+    "print_subtree": {
+      "callers": [
+        "print_subtree",
+        "filetree"
+      ],
+      "callees": [
+        "print_subtree"
+      ]
+    },
+    "filetree": {
+      "callers": [],
+      "callees": [
+        "role_of",
+        "print_subtree"
+      ]
+    },
+    "role_of": {
+      "callers": [
+        "filetree"
+      ],
+      "callees": []
+    },
+    "max_depth": {
+      "callers": [
+        "max_depth"
+      ],
+      "callees": [
+        "max_depth"
+      ]
+    }
+  },
+  "types": {
+    "TreeSitterIndexer": {
+      "kind": "classe",
+      "file": "scripts/build-index-ts.py",
+      "module": "scripts"
+    }
+  },
+  "stats": {
+    "functions": 31,
+    "types": 1,
+    "call_edges": 19,
+    "modules": 2,
+    "files_scanned": 7
+  }
+}

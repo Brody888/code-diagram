@@ -44,19 +44,10 @@ QUERIES = {
     "c": {
         "functions": """
             (function_definition
-                type: (_) @return_type
                 declarator: (function_declarator
                     declarator: (identifier) @name
-                    parameters: (parameter_list) @params
                 )
-                body: (_) @body
-            )
-            (declaration
-                type: (_) @return_type
-                declarator: (function_declarator
-                    declarator: (identifier) @name
-                    parameters: (parameter_list) @params
-                )
+                body: (compound_statement) @body
             )
         """,
         "calls": """
@@ -67,7 +58,6 @@ QUERIES = {
         "structs": """
             (struct_specifier
                 name: (type_identifier) @name
-                body: (field_declaration_list) @body
             )
         """,
     },
@@ -182,7 +172,10 @@ class TreeSitterIndexer:
         return lang in self.languages
 
     def parse_file(self, filepath: str, lang: str) -> dict | None:
-        """Parse a single file and extract symbols."""
+        """Parse a single file and extract symbols.
+
+        Compatible with tree-sitter 0.23 (legacy) and 0.25+ (QueryCursor).
+        """
         language = self.languages.get(lang)
         if not language:
             return None
@@ -195,7 +188,8 @@ class TreeSitterIndexer:
         except Exception:
             return None
 
-        tree = self.parser.parse(bytes(content, "utf-8"))
+        source = bytes(content, "utf-8")
+        tree = self.parser.parse(source)
         root = tree.root_node
 
         result = {
@@ -209,98 +203,83 @@ class TreeSitterIndexer:
         queries = QUERIES.get(lang, {})
         query_lang = language
 
-        # Extract functions with their bodies (for scoped call analysis)
+        # Determine API: 0.25+ uses QueryCursor, 0.23 uses language.query()
+        USE_CURSOR = hasattr(tree_sitter, "QueryCursor")
+
+        # ── Helper: run a query, return dict[str, list[Node]] ──
+        def run_query(query_src: str) -> dict:
+            caps = {}
+            if USE_CURSOR:
+                q = tree_sitter.Query(query_lang, query_src.encode("utf-8"))
+                cursor = tree_sitter.QueryCursor(q)
+                raw = cursor.captures(root)
+                for name, nodes in raw.items():
+                    caps[name] = nodes
+            else:
+                try:
+                    q = query_lang.query(query_src)
+                    raw = q.captures(root)
+                except Exception:
+                    return {}
+                if isinstance(raw, dict):
+                    caps = raw
+                else:
+                    for node, tag in raw:
+                        caps.setdefault(tag, []).append(node)
+            return caps
+
+        # ── Extract functions with their bodies ──
         if "functions" in queries:
-            q = query_lang.query(queries["functions"])
-            captures = q.captures(root)
+            caps = run_query(queries["functions"])
+            name_nodes = caps.get("name", [])
+            seen = set()
+            for name_node in name_nodes:
+                name = name_node.text.decode("utf-8")
+                if name.startswith("_") and len(name) <= 3:
+                    continue
+                if name in seen:
+                    continue
+                seen.add(name)
+                # Walk up to function_definition, find body
+                body = None
+                parent = name_node.parent
+                while parent and parent.type != "function_definition":
+                    parent = parent.parent
+                if parent:
+                    for child in parent.named_children:
+                        if child.type in ("compound_statement", "block", "body"):
+                            body = child
+                            break
+                result["functions"].append({"name": name, "file": filepath, "body": body})
 
-            if isinstance(captures, dict):
-                func_names_set = set()
-                # Collect function names and their body nodes
-                name_nodes = captures.get("name", [])
-                body_nodes = captures.get("body", [])
-                # Build a map: body_node -> function name
-                # In tree-sitter queries, captures from the same match share index
-                # But since we have dict format, we pair by matching names to the
-                # nearest enclosing body
-                for name_node in name_nodes:
-                    name = name_node.text.decode("utf-8")
-                    if name.startswith("_") and len(name) <= 3:
-                        continue
-                    if name in func_names_set:
-                        continue
-                    func_names_set.add(name)
-                    # Walk up to find the function_definition node
-                    body = None
-                    # Use the name's parent function_definition node to find body
-                    parent = name_node.parent
-                    while parent and parent.type != "function_definition":
-                        parent = parent.parent
-                    if parent:
-                        # Search for block/body in children
-                        for child in parent.named_children:
-                            if child.type in ("block", "body"):
-                                body = child
-                                break
-                    result["functions"].append({"name": name, "file": filepath, "body": body})
-
-        # Extract calls — scope to function bodies
+        # ── Extract calls, scope to function bodies ──
         if "calls" in queries:
-            q = query_lang.query(queries["calls"])
-            all_calls = q.captures(root)
-            call_names = []
-            if isinstance(all_calls, dict):
-                call_names = [n.text.decode("utf-8") for n in all_calls.get("callee", [])]
-            else:
-                call_names = [n.text.decode("utf-8") for n, tag in all_calls if tag == "callee"]
-
-            # Assign calls to functions by checking which function body contains each call node
-            call_nodes = []
-            if isinstance(all_calls, dict):
-                call_nodes = all_calls.get("callee", [])
-            else:
-                call_nodes = [n for n, tag in all_calls if tag == "callee"]
-
-            # Build function body ranges for quick containment check
-            func_body_ranges = {}
+            caps = run_query(queries["calls"])
+            call_nodes = caps.get("callee", [])
+            # Build function body byte ranges
+            func_ranges = {}
             for func in result["functions"]:
                 body = func.get("body")
                 if body:
-                    func_body_ranges[func["name"]] = (
-                        body.start_point[0], body.end_point[0],
-                        body.start_byte, body.end_byte
-                    )
-
-            # Assign each call to the functions whose body contains it
+                    func_ranges[func["name"]] = (body.start_byte, body.end_byte)
             for call_node in call_nodes:
                 callee = call_node.text.decode("utf-8")
                 cb = call_node.start_byte
-                for fname, (sl, el, sb, eb) in func_body_ranges.items():
+                for fname, (sb, eb) in func_ranges.items():
                     if sb <= cb <= eb:
                         result["calls"].append({"caller": fname, "callee": callee})
                         break
-                # If no function body contains it (top-level call), skip
 
-        # Extract types/structs
+        # ── Extract types/structs ──
         for type_key in ["structs", "classes"]:
             if type_key in queries:
-                q = query_lang.query(queries[type_key])
-                captures = q.captures(root)
-                if isinstance(captures, dict):
-                    for node in captures.get("name", []):
-                        result["types"].append({
-                            "name": node.text.decode("utf-8"),
-                            "kind": type_key.rstrip("s"),
-                            "file": filepath
-                        })
-                else:
-                    for node, tag in captures:
-                        if tag == "name":
-                            result["types"].append({
-                                "name": node.text.decode("utf-8"),
-                                "kind": type_key.rstrip("s"),
-                                "file": filepath
-                            })
+                caps = run_query(queries[type_key])
+                for node in caps.get("name", []):
+                    result["types"].append({
+                        "name": node.text.decode("utf-8"),
+                        "kind": type_key.rstrip("s"),
+                        "file": filepath
+                    })
 
         return result
 
